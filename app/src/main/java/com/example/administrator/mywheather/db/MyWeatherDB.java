@@ -7,6 +7,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
 import com.example.administrator.mywheather.model.City;
+import com.example.administrator.mywheather.model.County;
 import com.example.administrator.mywheather.model.Province;
 
 import java.security.Provider;
@@ -77,7 +78,7 @@ public class MyWeatherDB {
             values.put("city_name",city.getCityName());
             values.put("city_code",city.getCityCode());
             values.put("province_id",city.getProvinceId());
-            db.insert("City",null,values);
+            db.insert("City", null, values);
         }
     }
     //从数据库读取某省下所有城市的信息
@@ -95,6 +96,41 @@ public class MyWeatherDB {
                 list.add(city);
 
             }while(cursor.moveToNext());
+        }
+
+        if(cursor != null){
+            cursor.close();
+        }
+        return list;
+    }
+
+    //将Country实例存储到数据库
+    public void saveCountry(County county){
+        if (county != null){
+            ContentValues values = new ContentValues();
+            values.put("country_name",county.getCountyName());
+            values.put("country_code",county.getCountyCode());
+            values.put("city_id",county.getCityId());
+            db.insert("County", null, values);
+        }
+    }
+
+    //从数据库读取某城市下所有的县信息
+    public List<County> loadCounties(int cityId){
+        List<County> list = new ArrayList<>();
+        Cursor cursor = db.query("County",null,"city_id=?",new String[]{String.valueOf(cityId)},null,null,null);
+        if (cursor.moveToFirst()){
+            do {
+                County county = new County();
+                county.setId(cursor.getInt(cursor.getColumnIndex("id")));
+                county.setCountyName(cursor.getString(cursor.getColumnIndex("county_name")));
+                county.setCountyCode(cursor.getString(cursor.getColumnIndex("county_code")));
+                county.setCityId(cityId);
+                list.add(county);
+            }while(cursor.moveToFirst());
+        }
+        if (cursor != null){
+            cursor.close();
         }
         return list;
     }
